@@ -9,6 +9,7 @@
 
 library(shiny)
 library(tidyverse)
+library(car)
 getDat <- function(x1t,x2t){
   x1tr<-rep(1,x1t)
   x1fa<-rep(0,100-x1t)
@@ -36,7 +37,9 @@ ui <- fluidPage(
     ),
     mainPanel(
       plotOutput("distPlot"),
-      verbatimTextOutput("glmOut")
+      verbatimTextOutput("glmOut"),
+      verbatimTextOutput("logita"),
+      verbatimTextOutput("logitb")
     )
   )
 )
@@ -50,6 +53,26 @@ server <- function(input, output) {
   output$glmOut <- renderPrint({
     d<-getDat(input$x1T,input$x2T)
     summary(glm(y~type,data=d,family="binomial"))
+  })    
+  output$logita <- renderPrint({
+    d<-getDat(input$x1T,input$x2T)
+    dfa<-d %>% filter(type=="a")
+    dfb<-d %>% filter(type=="b")
+    ahit<-length(which(dfa$y==1))
+    amiss<-length(which(dfa$y==0))
+    print(paste("Intercept:",log(ahit/amiss)))
+  })
+  output$logitb <- renderPrint({
+    d<-getDat(input$x1T,input$x2T)
+    dfa<-d %>% filter(type=="a")
+    dfb<-d %>% filter(type=="b")
+    ahit<-length(which(dfa$y==1))
+    amiss<-length(which(dfa$y==0))
+    bhit<-length(which(dfb$y==1))
+    bmiss<-length(which(dfb$y==0))
+    diffhit<-ahit-bhit
+    diffmiss<-amiss-bmiss
+    print(paste("Slope:",log(bhit/bmiss)-log(ahit/amiss)))
   })
 }
 shinyApp(ui = ui, server = server)
