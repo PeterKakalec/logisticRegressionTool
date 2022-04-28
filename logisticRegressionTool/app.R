@@ -1,15 +1,7 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 library(tidyverse)
 library(car)
+library(extraDistr)
 getDat <- function(x1t,x2t){
   x1tr<-rep(1,x1t)
   x1fa<-rep(0,100-x1t)
@@ -48,7 +40,8 @@ server <- function(input, output) {
   output$distPlot <- renderPlot({
     d<-getDat(input$x1T,input$x2T)
     ggplot(data=d,aes(y=y,x=type,color=as.factor(y)))+
-      geom_point()
+      geom_point()+
+      theme_classic()
   })
   output$glmOut <- renderPrint({
     d<-getDat(input$x1T,input$x2T)
@@ -61,6 +54,7 @@ server <- function(input, output) {
     ahit<-length(which(dfa$y==1))
     amiss<-length(which(dfa$y==0))
     print(paste("Intercept:",log(ahit/amiss)))
+    #exp(log(ahit/amiss)) gives actual fraction of ahit/amiss
   })
   output$logitb <- renderPrint({
     d<-getDat(input$x1T,input$x2T)
