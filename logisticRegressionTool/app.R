@@ -288,22 +288,30 @@ server <- function(input, output) {
     ))
   })
   output$multiCatPlot <- renderPlot({
-    slope<-input$slope
-    intercept<-input$intercept
-    #sval<-(1/slope)
-    xSeq<-seq(from=0,to=1/slope-intercept,length.out=100)
-    hits<-rbinom(xSeq,100,(xSeq*slope))+(intercept*100)
-    hits[which(hits>100)]<-100
-    tempDat<-NULL
-    finDat<-NULL
-    for(i in 1:length(xSeq)){
-      tempDat<-data.frame(y=c(rep(1,hits[i]),rep(0,100-hits[i])),x=xSeq[i])
-      finDat<-rbind(finDat,tempDat)
-    }
-    ggplot(data=finDat,aes(y=y,x=x,color=as.factor(y)))+
-      geom_point()+
-      stat_smooth(method="glm", se=FALSE, color="black", 
-                  method.args = list(family=binomial)) + theme_classic()
+    at<-rep(1,input$x1a)
+    bt<-rep(1,input$x1b)
+    ct<-rep(1,input$x1c)
+    
+    at2<-rep(1,input$x2a)
+    bt2<-rep(1,input$x2b)
+    ct2<-rep(1,input$x2c)
+    total<-sum(c(at,bt,ct,at2,bt2,bt2))
+    a1p<-input$x1a/total
+    b1p<-input$x1b/total
+    c1p<-input$x1c/total
+    a2p<-input$x2a/total
+    b2p<-input$x2b/total
+    c2p<-input$x2c/total
+    dat1<-data.frame(p=c(a1p,b1p,c1p,a2p,b2p,c2p),group=factor(c("1","1","1","2","2","2")),type=factor(c("a","b","c","a","b","c")))
+    ggplot(data=dat1,aes(y=p,x=group,group=type,color=type))+
+      geom_line()+
+      theme_classic()+
+      xlab("Group")+
+      ylab("Probability")+
+      labs(color="State")
+      
+      # stat_smooth(method="glm", se=FALSE, color="black", 
+      #             method.args = list(family=binomial)) + theme_classic()
   })  
 
 }
